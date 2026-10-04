@@ -1,0 +1,7 @@
+.venv/
+data/**
+!data/bronze/.gitkeep
+!data/silver/.gitkeep
+__pycache__/
+*.duckdb
+.DS_Store
