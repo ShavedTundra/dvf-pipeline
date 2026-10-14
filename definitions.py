@@ -9,7 +9,6 @@ def bronze_raw()-> None:
     print("Loaded data")
 
 dbt_partitions = dg.MonthlyPartitionsDefinition(start_date="2024-12-31")
-f
 @dbt_assets(manifest=Path("dvf/target/manifest.json"), partitions_def=dbt_partitions)
 def dvf_dbt_assets(context: dg.AssetExecutionContext, dbt: DbtCliResource):
     yield from dbt.cli(["build"], context=context).stream()
