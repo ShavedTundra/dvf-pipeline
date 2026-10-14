@@ -5,10 +5,12 @@ from dagster_dbt import dbt_assets, DbtCliResource
 
 @dg.asset(retry_policy= dg.RetryPolicy(max_retries=2))
 def bronze_raw()-> None:
-    data = pd.read_csv(filepath_or_buffer=Path("data/bronze/true_dvf_44.csv"))
-    print("Loaded data")
+    files = sorted(Path("data/bronze").glob("true_dvf_44*.csv"))
+    for f in files:
+        pd.read_csv(filepath_or_buffer=f)
+    print(f"Loaded {len(files)} yearly DVF export(s)")
 
-dbt_partitions = dg.MonthlyPartitionsDefinition(start_date="2024-12-31")
+dbt_partitions = dg.MonthlyPartitionsDefinition(start_date="2020-12-31")
 @dbt_assets(manifest=Path("dvf/target/manifest.json"), partitions_def=dbt_partitions)
 def dvf_dbt_assets(context: dg.AssetExecutionContext, dbt: DbtCliResource):
     yield from dbt.cli(["build"], context=context).stream()

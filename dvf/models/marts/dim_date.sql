@@ -1,5 +1,13 @@
+with bounds as (
+    select min(date_mutation)::DATE as dmin, max(date_mutation)::DATE as dmax
+    from {{ ref('stg_sales') }}
+),
+days as (
+    select unnest(generate_series(dmin, dmax, interval 1 day))::DATE as d
+    from bounds
+)
 select
-d::DATE as date,      
+d as date,
 year(d) as annee,
 month(d) as mois
-from range(DATE '2025-01-01', DATE '2026-01-01', INTERVAL 1 DAY) t(d)    
+from days
