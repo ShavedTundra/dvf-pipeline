@@ -5,6 +5,8 @@ Ingestion → medallion Parquet → dbt models → Dagster orchestration. Airflo
 planned as an orchestration-layer alternative.
 Companion to a real-estate estimation project on the same data: this repo builds the
 producer side (clean, modeled, tested datasets) that a consumer side consumes.
+Scope: Loire-Atlantique (44), 2021–2025, ~111k sales — layout partitioned to absorb
+more departments/years without touching transforms.
 
 ## Layout
 - `data/bronze/` — raw DVF exports, unmodified (never committed)
