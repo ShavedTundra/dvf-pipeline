@@ -1,0 +1,2 @@
+valeur_fonciere_number,top_valeur_fonciere,surface_terrain_number,top_surface,local_number,top_local
+429194,73565688.0,430246,7817439.0,430246,UNE MAISON

@@ -5,3 +5,6 @@ data/**
 __pycache__/
 *.duckdb
 .DS_Store
+.dagster_home/
+logs/
+dvf/fact_sales_count.sql/

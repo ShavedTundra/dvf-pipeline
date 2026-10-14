@@ -1,0 +1,54 @@
+version: 2
+
+models:
+ - name: dim_type_local
+   columns:
+     - name: local_key
+       data_tests: [unique, not_null]
+     - name: label
+       data_tests:
+         - unique
+         - not_null
+         - accepted_values:
+             values: ['Appartement', 'Maison']
+ 
+ - name: dim_date
+   columns:
+     - name: date
+       data_tests: [unique, not_null]
+
+ - name: dim_commune
+   columns: 
+     - name: commune_key
+       data_tests: [unique, not_null]
+     - name: code_insee
+       data_tests: [unique, not_null]
+ 
+ - name: fact_sales
+   columns:
+     - name: commune_key
+       data_tests:
+         - not_null 
+         - relationships:
+             to: ref('dim_commune')
+             field: commune_key
+     - name: local_key
+       data_tests:
+         - not_null
+         - relationships:
+             to: ref('dim_type_local')
+             field: local_key
+     - name: date
+       data_tests:
+         - not_null
+         - relationships: 
+             to: ref('dim_date')
+             field: date
+     - name: id_mutation
+       data_tests:
+         - not_null
+ - name: median_px_m2_commune
+   columns:
+     - name: code_insee
+       data_tests: [unique, not_null]
+
