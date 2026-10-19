@@ -2,6 +2,11 @@ version: 2
 sources:
  - name: bronze
    schema: main
+   loaded_at_field: cast(date_mutation as timestamp)
+   freshness:
+     warn_after: {count: 100, period: day}
+     error_after: {count: 400, period: day}
    tables:
     - name: silver_tables
-      loaded_at_field: date_mutation
+      
+
