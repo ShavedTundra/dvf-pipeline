@@ -7,8 +7,29 @@ from dagster_dbt import dbt_assets, DbtCliResource
 def bronze_raw()-> None:
     files = sorted(Path("data/bronze").glob("true_dvf_44*.csv"))
     for f in files:
-        pd.read_csv(filepath_or_buffer=f)
+	    pd.read_csv(filepath_or_buffer=f)
+    
     print(f"Loaded {len(files)} yearly DVF export(s)")
+
+@dg.asset_check(asset=bronze_raw, blocking=True)
+def bronze_file_volume():
+    counts = {f.name: len(pd.read_csv(f)) for f in sorted(Path("data/bronze").glob("true_dvf_44*.csv"))}
+
+    all_valid = all(count > 0 for _, count in counts.items())
+
+    if not all_valid:
+	    failed_names = [name for (name, count) in counts.items() if count <= 0]
+    else:
+ 	    failed_names = []
+    
+    failed_names_str = ", ".join(failed_names)
+    return dg.AssetCheckResult(
+		passed=all_valid,
+		metadata={
+			"status": "passed" if all_valid else "failed",
+			"failed_years": failed_names_str
+		}
+	)
 
 dbt_partitions = dg.MonthlyPartitionsDefinition(start_date="2020-12-31")
 @dbt_assets(manifest=Path("dvf/target/manifest.json"), partitions_def=dbt_partitions)
@@ -37,6 +58,7 @@ defs = dg.Definitions(
     assets= [bronze_raw, dvf_dbt_assets],
     schedules=[dbt_weekly],
     sensors=[bronze_arrival],
-    resources= {"dbt": DbtCliResource(project_dir="dvf")}
+    resources= {"dbt": DbtCliResource(project_dir="dvf")},
+    asset_checks=[bronze_file_volume]
 )
 
