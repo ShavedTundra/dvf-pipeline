@@ -4,3 +4,4 @@ dbt-duckdb==1.11.0
 dagster==1.13.26
 dagster-webserver==1.13.26
 dagster-dbt==0.29.26
+pyspark==4.2.0

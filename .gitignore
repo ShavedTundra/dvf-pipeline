@@ -8,3 +8,4 @@ __pycache__/
 .dagster_home/
 logs/
 dvf/fact_sales_count.sql/
+graphify-out/
