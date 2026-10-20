@@ -1,6 +1,6 @@
 version: 2
 sources:
- - name: bronze
+ - name: silver
    schema: main
    loaded_at_field: cast(date_mutation as timestamp)
    freshness:

@@ -10,7 +10,7 @@ models:
          - unique
          - not_null
          - accepted_values:
-             values: ['Appartement', 'Maison']
+             values: ['Appartement', 'Maison', 'Dépendance', 'Local industriel. commercial ou assimilé']
  
  - name: dim_date
    columns:
