@@ -23,13 +23,17 @@ with raw as (
         cast(surface_reelle_bati as double) as surface_bati,
         cast(code_commune as bigint) as code_insee,
         cast(code_departement as varchar) as dept,
+        cast(numero_disposition as integer) as numero_disposition,
         year(cast(date_mutation as date)) as annee
     from read_csv_auto({files}, union_by_name=true, all_varchar=true, sample_size=-1)
 ),
 deduped as (
     select *
     from raw
-    qualify row_number() over (partition by id_mutation order by date_mutation) = 1
+    -- L16/L21 winner rule: biggest built surface wins, NULL surfaces lose,
+    -- numero_disposition breaks exact ties.
+    qualify row_number() over (partition by id_mutation
+        order by surface_bati desc nulls last, numero_disposition asc) = 1
 ),
 priced as (
     select
@@ -39,7 +43,7 @@ priced as (
     from deduped
 )
 select
-    *,
+    * exclude (numero_disposition),
     median(px_m2) over (partition by code_insee) as median_px_m2_per_commune
 from priced
 """
