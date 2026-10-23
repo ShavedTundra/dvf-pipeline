@@ -1,8 +1,8 @@
 # dvf-pipeline
 
 ELT pipeline on French property-sales open data (DVF, DGFiP).
-Ingestion → medallion Parquet → dbt models → Dagster orchestration. Airflow port
-planned as an orchestration-layer alternative.
+Ingestion → medallion Parquet → dbt models → orchestrated by Dagster
+(`definitions.py`) and Airflow (`dags/`) — two orchestrators over the same transforms.
 Companion to a real-estate estimation project on the same data: this repo builds the
 producer side (clean, modeled, tested datasets) that a consumer side consumes.
 Scope: West-France departments 44, 49, 53, 72, 85 (Pays de la Loire +
@@ -15,6 +15,12 @@ partitioned to absorb more departments/years without touching transforms.
 - `dvf/` — dbt project: staging views, marts (fact_sales + dimensions), custom data tests
 - `definitions.py` — Dagster code location: bronze ingestion asset with retries,
   monthly-partitioned dbt assets, weekly build schedule, file-arrival sensor
+- `dags/` — Airflow DAG: file sensor → bronze ingest → silver build → dbt,
+  weekly cron, `max_active_runs=1`
+- `Dockerfile` + `requirements-airflow.txt` — custom Airflow 3.3.2 image
+  (dbt + duckdb layered on ASF base)
+- `.devcontainer/` — VS Code devcontainer on the same image (Pylance resolves
+  Airflow imports); `.dbt/` — dbt profiles for container runs
 - `sql/` — query history, one file per pipeline step
 - `.venv/` — project venv (uv)
 
@@ -63,7 +69,27 @@ DVF+ delivery (CEREMA), pipe-separated, all years; `dvf_44.csv` is its
 Note: the `bronze_arrival` sensor fires on any new `true_dvf_*.csv` directly in
 `data/bronze/`; auxiliary `*.csv` files are ignored.
 
+## Orchestration (Airflow)
+
+`dags/dvf_pipeline.py` mirrors the Dagster pipeline: `FileSensor` on
+`data/bronze/true_dvf_*.csv` (reschedule mode) → `ingest_bronze` (row-count
+guard) → `build_silver` (DuckDB dedup + `px_m2`/commune medians) → `run_dbt`
+(dbt build, 29 tests). Weekly cron Mon 07:00 Europe/Paris, retries=2/5min,
+`max_active_runs=1`. Design decisions, all verified in-container:
+
+- `max_active_runs=1` — DuckDB is single-writer; concurrent DAG runs fail
+  fast on the file lock. Serialize at the scheduler, not by retry luck.
+- Airflow 3 seeds NO default connections: FileSensor needs
+  `AIRFLOW_CONN_FS_DEFAULT='fs:///?path=%2F'` injected at `docker run`.
+- Image pinned `apache/airflow:3.3.2`, never `latest` — critical RCE CVEs
+  below 3.3.0; dbt/duckdb layered via `Dockerfile` with `pip check` guard.
+- Auth by default (FAB/JWT), unlike `dagster dev` — and CVE-2026-48726
+  (JWT valid after logout) argues for staying pinned.
+- Idempotent: clear-and-rerun reproduces identical silver counts
+  (deterministic dedup winner rule: surface DESC NULLS LAST, numero_disposition tiebreak).
+
 ## Tooling
 DuckDB (1.5.6) as engine · dbt-core 1.12 + dbt-duckdb for transforms ·
 Dagster 1.13 with dagster-dbt for orchestration.
+Airflow 3.3.2 (custom Docker image) as second orchestrator.
 Storage layer designed to swap to BigQuery without touching transforms.

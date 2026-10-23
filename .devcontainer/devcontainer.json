@@ -1,0 +1,9 @@
+{
+    "name": "dvf-airflow",
+    "build": { "dockerfile": "../Dockerfile"},
+    "remoteUser": "airflow",
+    "customizations": { "python": {"defaultInterpreterPath": "/usr/local/bin/python"} },
+    "workspaceMount": "source=${localWorkspaceFolder},target=/opt/airflow/repo,type=bind",
+    "workspaceFolder": "/opt/airflow/repo",
+    "forwardPorts": [8081]
+}

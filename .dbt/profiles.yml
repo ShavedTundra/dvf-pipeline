@@ -1,0 +1,8 @@
+dvf:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: /opt/airflow/repo/data_bronze.duckdb
+      threads: 1
+

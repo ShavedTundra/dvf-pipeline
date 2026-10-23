@@ -9,3 +9,6 @@ __pycache__/
 logs/
 dvf/fact_sales_count.sql/
 graphify-out/
+docker_airflow_reminder.md
+.vscode/
+.dbt/.user.yml
