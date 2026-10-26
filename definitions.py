@@ -49,7 +49,7 @@ from priced
 """
 
 
-@dg.asset(retry_policy=dg.RetryPolicy(max_retries=2))
+@dg.asset(retry_policy=dg.RetryPolicy(max_retries=2), key=["silver", "silver_tables"])
 def bronze_raw() -> None:
     files = sorted(str(f) for f in Path("data/bronze").glob(GLOB))
     if not files:
