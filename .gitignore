@@ -12,3 +12,12 @@ graphify-out/
 docker_airflow_reminder.md
 .vscode/
 .dbt/.user.yml
+
+# Teaching workspace (agent prep material — MP Data BigQuery deliverable, not project code)
+/MISSION.md
+/NOTES.md
+/RESOURCES.md
+/learning-records/
+/lessons/
+/assets/
+/reference/
