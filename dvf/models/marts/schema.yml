@@ -47,6 +47,10 @@ models:
      - name: id_mutation
        data_tests:
          - not_null
+     - name: numero_disposition
+       data_tests: [not_null]
+     - name: id_parcelle
+       data_tests: [not_null]
  - name: median_px_m2_commune
    columns:
      - name: code_insee
