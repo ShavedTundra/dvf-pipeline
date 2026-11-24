@@ -24,6 +24,7 @@ with raw as (
         cast(code_commune as bigint) as code_insee,
         cast(code_departement as varchar) as dept,
         cast(numero_disposition as integer) as numero_disposition,
+	id_parcelle,
         year(cast(date_mutation as date)) as annee
     from read_csv_auto({files}, union_by_name=true, all_varchar=true, sample_size=-1)
 ),
@@ -43,7 +44,7 @@ priced as (
     from deduped
 )
 select
-    * exclude (numero_disposition),
+    *,
     median(px_m2) over (partition by code_insee) as median_px_m2_per_commune
 from priced
 """
